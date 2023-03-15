@@ -109,3 +109,31 @@ func BenchmarkGoParallel(b *testing.B) {
 	}
 	wg.Wait()
 }
+
+func BenchmarkParallelRead(b *testing.B) {
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			buf := make([]byte, 64)
+			Read(buf)
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkGoParallelRead(b *testing.B) {
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			buf := make([]byte, 64)
+			r.Read(buf)
+		}()
+	}
+	wg.Wait()
+}
