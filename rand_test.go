@@ -78,7 +78,7 @@ func BenchmarkReadLarge(b *testing.B) {
 	Read(buf)
 }
 
-func BenchmarkGoReadMedium(b *testing.B) {
+func BenchmarkGoReadLarge(b *testing.B) {
 	buf := make([]byte, 128*1024)
 	b.ResetTimer()
 	r.Read(buf)
