@@ -43,3 +43,68 @@ func BenchmarkGoInt(b *testing.B) {
 		_ = r.Int()
 	}
 }
+
+func BenchmarkReadSmall(b *testing.B) {
+	// 1 KB
+	buf := make([]byte, 1024)
+	b.ResetTimer()
+	Read(buf)
+}
+
+func BenchmarkGoReadSmall(b *testing.B) {
+	// 32 KB
+	buf := make([]byte, 1024)
+	b.ResetTimer()
+	r.Read(buf)
+}
+
+func BenchmarkReadMedium(b *testing.B) {
+	buf := make([]byte, 32*1024)
+	b.ResetTimer()
+	Read(buf)
+}
+
+func BenchmarkGoReadMedium(b *testing.B) {
+	buf := make([]byte, 32*1024)
+	b.ResetTimer()
+	r.Read(buf)
+}
+
+func BenchmarkReadLarge(b *testing.B) {
+	// 128 KB
+	buf := make([]byte, 128*1024)
+	b.ResetTimer()
+	Read(buf)
+}
+
+func BenchmarkGoReadMedium(b *testing.B) {
+	buf := make([]byte, 128*1024)
+	b.ResetTimer()
+	r.Read(buf)
+}
+
+func BenchmarkParallel(b *testing.B) {
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			_ = Int()
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkGoParallel(b *testing.B) {
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			_ = r.Int()
+		}()
+	}
+	wg.Wait()
+}
