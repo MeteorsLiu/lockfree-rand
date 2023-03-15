@@ -11,7 +11,7 @@ import (
 
 type lockfreeRNG struct {
 	Rng     *r.Rand
-	grabbed atomic.Bool
+	grabbed int32
 }
 
 func newlockfreeRng() *lockfreeRNG {
@@ -21,14 +21,14 @@ func newlockfreeRng() *lockfreeRNG {
 }
 
 func (l *lockfreeRNG) Grab() bool {
-	if l.grabbed.Load() {
+	if l.grabbed == 1 {
 		return false
 	}
-	return l.grabbed.CompareAndSwap(false, true)
+	return atomic.CompareAndSwapInt32(&l.grabbed, 0, 1)
 }
 
 func (l *lockfreeRNG) Release() {
-	l.grabbed.CompareAndSwap(true, false)
+	atomic.CompareAndSwapInt32(&l.grabbed, 1, 0)
 }
 
 var (
