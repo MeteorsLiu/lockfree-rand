@@ -1,12 +1,18 @@
 package rand
 
 import (
+	"math"
 	r "math/rand"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/zeebo/wyhash"
+)
+
+var (
+	NV_MAGICCONST = 4 * math.Exp(-0.5) / math.Sqrt(2.0)
 )
 
 type lockfreeRNG struct {
@@ -198,14 +204,6 @@ func Uint64() uint64 {
 }
 
 func Intrange(from, to int, _step ...int) int {
-	var rd *r.Rand
-	if globalRng.Grab() {
-		defer globalRng.Release()
-		rd = globalRng.Rng
-	} else {
-		rd = defaultRandPool.Get().(*r.Rand)
-		defer defaultRandPool.Put(rd)
-	}
 	stp := step(_step...)
 	width := to - from
 	switch {
@@ -223,14 +221,6 @@ func Intrange(from, to int, _step ...int) int {
 }
 
 func Int63range(from, to int64, _step ...int) int64 {
-	var rd *r.Rand
-	if globalRng.Grab() {
-		defer globalRng.Release()
-		rd = globalRng.Rng
-	} else {
-		rd = defaultRandPool.Get().(*r.Rand)
-		defer defaultRandPool.Put(rd)
-	}
 	stp := int64(step(_step...))
 	width := to - from
 	switch {
@@ -248,14 +238,6 @@ func Int63range(from, to int64, _step ...int) int64 {
 }
 
 func Int31range(from, to int32, _step ...int) int32 {
-	var rd *r.Rand
-	if globalRng.Grab() {
-		defer globalRng.Release()
-		rd = globalRng.Rng
-	} else {
-		rd = defaultRandPool.Get().(*r.Rand)
-		defer defaultRandPool.Put(rd)
-	}
 	stp := int32(step(_step...))
 	width := to - from
 	switch {
@@ -270,4 +252,200 @@ func Int31range(from, to int32, _step ...int) int32 {
 	default:
 		panic("error step")
 	}
+}
+
+func ChoiceString(a string) byte {
+	if len(a) == 0 {
+		return byte(0)
+	}
+	return a[Intn(len(a))]
+}
+
+func SampleString(s string, n int) string {
+	if len(s) == 0 || n >= len(s) {
+		return s
+	}
+	if n == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	sb.Grow(n)
+	for i := 0; i < n; i++ {
+		sb.WriteByte(s[Intn(len(s))])
+	}
+	return sb.String()
+}
+func Choice[T any](a []T) (r T) {
+	if len(a) == 0 {
+		return
+	}
+	r = a[Intn(len(a))]
+	return
+}
+
+func Sample[T any](p []T, n int) []T {
+	if len(p) == 0 || n >= len(p) {
+		return p
+	}
+
+	if n == 0 {
+		return p[:0]
+	}
+	new := make([]T, n)
+	for i := 0; i < n; i++ {
+		new[i] = p[Intn(len(p))]
+	}
+	return new
+}
+
+func Uniform32(a, b float32) float32 {
+	return a + (b-a)*Float32()
+}
+func Uniform64(a, b float64) float64 {
+	return a + (b-a)*Float64()
+}
+
+func Triangular(low, high float64, mode ...float64) float64 {
+	c := 0.5
+	if len(mode) > 0 {
+		if high-low == 0 {
+			return 0
+		}
+		c = (mode[0] - low) / (high - low)
+	}
+	u := Float64()
+	if u > c {
+		u = 1.0 - u
+		c = 1.0 - c
+		low, high = high, low
+	}
+	return low + (high-low)*math.Sqrt(u*c)
+}
+func Normalvariate(mu, sigma float64) float64 {
+	var z float64
+	for {
+		u1 := Float64()
+		u2 := 1.0 - Float64()
+		z = NV_MAGICCONST * (u1 - 0.5) / u2
+		zz := z * z / 4.0
+		if zz <= math.Log(u2) {
+			break
+		}
+	}
+	return mu + z*sigma
+}
+
+func Gauss(mu, sigma float64) float64 {
+	x2pi := Float64() * 2 * math.Pi
+	g2rad := math.Sqrt(-2.0 * math.Log(1.0-Float64()))
+	z := math.Cos(x2pi) * g2rad
+	return mu + z*sigma
+}
+
+func Lognormvariate(mu, sigma float64) float64 {
+	return math.Exp(Normalvariate(mu, sigma))
+}
+
+func Expovariate(lambd float64) float64 {
+	if lambd == 0 {
+		lambd = 1
+	}
+	return math.Log(1-Float64()) / lambd
+}
+
+func Vonmisesvariate(mu, kappa float64) float64 {
+	if kappa <= 1e-6 {
+		return 2 * math.Pi * Float64()
+	}
+	s := 0.5 / kappa
+	r := s + math.Sqrt(1.0+s*s)
+	var z float64
+	for {
+		u1 := Float64()
+		z = math.Cos(math.Pi * u1)
+		d := z / (r + z)
+		u2 := Float64()
+		if u2 < 1.0-d*d || u2 <= (1.0-d)*math.Exp(d) {
+			break
+		}
+	}
+	q := 1.0 / r
+	f := (q + z) / (1.0 + q*z)
+	u3 := Float64()
+	var theta float64
+	if u3 > 0.5 {
+		theta = math.Mod(mu+math.Acos(f), 2*math.Pi)
+	} else {
+		theta = math.Mod(mu-math.Acos(f), 2*math.Pi)
+	}
+
+	return theta
+}
+
+func Gammavariate(alpha, beta float64) float64 {
+	if alpha <= 0.0 || beta <= 0.0 {
+		return 0
+	}
+	if alpha > 1 {
+		ainv := math.Sqrt(2.0*alpha - 1.0)
+		bbb := alpha - math.Log(4)
+		ccc := alpha + ainv
+		SG_MAGICCONST := 1.0 + math.Log(4.5)
+		for {
+			u1 := Float64()
+			if 1e-7 < u1 && u1 < 0.9999999 {
+				continue
+			}
+			u2 := 1.0 - Float64()
+			v := math.Log(u1/(1.0-u1)) / ainv
+			x := alpha * math.Exp(v)
+			z := u1 * u1 * u2
+			r := bbb + ccc*v - x
+			if r+SG_MAGICCONST-4.5*z >= 0.0 || r >= math.Log(z) {
+				return x * beta
+			}
+		}
+	} else if alpha == 1 {
+		return -math.Log(1.0-Float64()) * beta
+	}
+	var x float64
+	for {
+		u := Float64()
+		b := (math.E + alpha) / math.E
+		p := b * u
+		if p <= 1.0 {
+			x = math.Pow(p, 1.0/alpha)
+		} else {
+			x = -math.Log((b - p) / alpha)
+		}
+		u1 := Float64()
+		if p > 1.0 {
+			if u1 <= math.Pow(x, alpha-1.0) {
+				break
+			}
+		} else if u1 <= math.Exp(-x) {
+			break
+		}
+	}
+	return x * beta
+}
+func Betavariate(alpha, beta float64) float64 {
+	y := Gammavariate(alpha, 1.0)
+	if y > 0 {
+		return y / (y + Gammavariate(beta, 1.0))
+	}
+	return 0.0
+}
+
+// TODO
+// func Binomialvariate(n, p float64) float64
+
+func Paretovariate(alpha float64) float64 {
+	u := 1.0 - Float64()
+	return math.Pow(u, -1.0/alpha)
+}
+
+func Weibullvariate(alpha, beta float64) float64 {
+	u := 1.0 - Float64()
+	return alpha * math.Pow(-math.Log(u), 1.0/beta)
 }
