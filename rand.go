@@ -31,7 +31,7 @@ func step(s ...int) int {
 }
 
 func getTimeBasedSeed() int64 {
-	return time.Now().UnixNano() ^ int64(rng.Uint64())
+	return int64(rng.Uint64()) ^ time.Now().UnixNano()
 }
 
 func ExpFloat64() float64 {
