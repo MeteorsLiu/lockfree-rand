@@ -254,6 +254,15 @@ func Int31range(from, to int32, _step ...int) int32 {
 	}
 }
 
+func RandBytes(n int) []byte {
+	if n <= 0 {
+		return nil
+	}
+	b := make([]byte, n)
+	Read(b)
+	return b
+}
+
 func ChoiceString(a string) byte {
 	if len(a) == 0 {
 		return byte(0)
