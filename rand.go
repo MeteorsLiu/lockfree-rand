@@ -21,6 +21,9 @@ func newlockfreeRng() *lockfreeRNG {
 }
 
 func (l *lockfreeRNG) Grab() bool {
+	if l.grabbed.Load() {
+		return false
+	}
 	return l.grabbed.CompareAndSwap(false, true)
 }
 
