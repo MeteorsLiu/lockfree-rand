@@ -2,6 +2,7 @@ package rand
 
 import (
 	r "math/rand"
+	"sync"
 	"testing"
 )
 
