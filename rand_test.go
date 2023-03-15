@@ -27,7 +27,7 @@ func TestAll(t *testing.T) {
 	t.Log(Uint64())
 	t.Log(Int31range(10, 20))
 	t.Log(Intrange(100, 200))
-	t.Log(Int64range(10522, 20453))
+	t.Log(Int63range(10522, 20453))
 }
 
 func BenchmarkInt(b *testing.B) {
