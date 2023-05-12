@@ -3,14 +3,11 @@ package rand
 import (
 	r "math/rand"
 	"sync"
+	"sync/atomic"
 	"testing"
-)
 
-func TestSeed(t *testing.T) {
-	t.Log(getTimeBasedSeed())
-	t.Log(getTimeBasedSeed())
-	t.Log(getTimeBasedSeed())
-}
+	"github.com/MeteorsLiu/wyhash"
+)
 
 func TestAll(t *testing.T) {
 	t.Log(ExpFloat64())
@@ -29,6 +26,8 @@ func TestAll(t *testing.T) {
 	t.Log(Int31range(10, 20))
 	t.Log(Intrange(100, 200))
 	t.Log(Int63range(10522, 20453))
+	t.Log(Uniform32(30.5, 55.5))
+	t.Log(Uniform64(30.5, 55.5))
 }
 
 func BenchmarkInt(b *testing.B) {
@@ -49,39 +48,51 @@ func BenchmarkReadSmall(b *testing.B) {
 	// 1 KB
 	buf := make([]byte, 1024)
 	b.ResetTimer()
-	Read(buf)
+	for i := 0; i < b.N; i++ {
+		Read(buf)
+	}
 }
 
 func BenchmarkGoReadSmall(b *testing.B) {
 	// 32 KB
 	buf := make([]byte, 1024)
 	b.ResetTimer()
-	r.Read(buf)
+	for i := 0; i < b.N; i++ {
+		r.Read(buf)
+	}
 }
 
 func BenchmarkReadMedium(b *testing.B) {
 	buf := make([]byte, 32*1024)
 	b.ResetTimer()
-	Read(buf)
+	for i := 0; i < b.N; i++ {
+		Read(buf)
+	}
 }
 
 func BenchmarkGoReadMedium(b *testing.B) {
 	buf := make([]byte, 32*1024)
 	b.ResetTimer()
-	r.Read(buf)
+	for i := 0; i < b.N; i++ {
+		r.Read(buf)
+	}
 }
 
 func BenchmarkReadLarge(b *testing.B) {
 	// 128 KB
 	buf := make([]byte, 128*1024)
 	b.ResetTimer()
-	Read(buf)
+	for i := 0; i < b.N; i++ {
+		Read(buf)
+	}
 }
 
 func BenchmarkGoReadLarge(b *testing.B) {
 	buf := make([]byte, 128*1024)
 	b.ResetTimer()
-	r.Read(buf)
+	for i := 0; i < b.N; i++ {
+		r.Read(buf)
+	}
 }
 
 func BenchmarkParallel(b *testing.B) {
@@ -133,6 +144,45 @@ func BenchmarkGoParallelRead(b *testing.B) {
 			defer wg.Done()
 			buf := make([]byte, 64)
 			r.Read(buf)
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkWyhashParallelRead(b *testing.B) {
+	var rng wyhash.SRNG
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			buf := make([]byte, 64)
+			rng.Read(buf)
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkWyhashPoolParallelRead(b *testing.B) {
+	var lock int32
+	var rng wyhash.RNG
+	var srng wyhash.SRNG
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			buf := make([]byte, 64)
+			if lock == 0 {
+				if atomic.CompareAndSwapInt32(&lock, 0, 1) {
+					rng.Read(buf)
+					atomic.StoreInt32(&lock, 0)
+					return
+				}
+			}
+			srng.Read(buf)
 		}()
 	}
 	wg.Wait()

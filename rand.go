@@ -6,13 +6,17 @@ import (
 	"strings"
 	"sync"
 	"sync/atomic"
-	"time"
 
-	"github.com/zeebo/wyhash"
+	"github.com/MeteorsLiu/wyhash"
 )
 
 var (
 	NV_MAGICCONST = 4 * math.Exp(-0.5) / math.Sqrt(2.0)
+)
+
+const (
+	UNLOCK int32 = iota
+	LOCKED
 )
 
 type lockfreeRNG struct {
@@ -22,19 +26,19 @@ type lockfreeRNG struct {
 
 func newlockfreeRng() *lockfreeRNG {
 	return &lockfreeRNG{
-		Rng: r.New(r.NewSource(getTimeBasedSeed())),
+		Rng: r.New(r.NewSource(int64(rng.Uint64()))),
 	}
 }
 
 func (l *lockfreeRNG) Grab() bool {
-	if l.grabbed == 1 {
+	if l.grabbed == LOCKED {
 		return false
 	}
-	return atomic.CompareAndSwapInt32(&l.grabbed, 0, 1)
+	return atomic.CompareAndSwapInt32(&l.grabbed, UNLOCK, LOCKED)
 }
 
 func (l *lockfreeRNG) Release() {
-	atomic.CompareAndSwapInt32(&l.grabbed, 1, 0)
+	atomic.StoreInt32(&l.grabbed, UNLOCK)
 }
 
 var (
@@ -44,7 +48,7 @@ var (
 	// lock free rand pool
 	defaultRandPool = sync.Pool{
 		New: func() any {
-			return r.New(r.NewSource(getTimeBasedSeed()))
+			return r.New(r.NewSource(int64(rng.Uint64())))
 		},
 	}
 )
@@ -57,10 +61,6 @@ func step(s ...int) int {
 		}
 	}
 	return defaultStep
-}
-
-func getTimeBasedSeed() int64 {
-	return time.Now().UnixNano() ^ int64(rng.Uint64())
 }
 
 func ExpFloat64() float64 {
