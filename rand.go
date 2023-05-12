@@ -63,144 +63,172 @@ func step(s ...int) int {
 	return defaultStep
 }
 
-func ExpFloat64() float64 {
+func ExpFloat64() (ret float64) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.ExpFloat64()
+		ret = globalRng.Rng.ExpFloat64()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.ExpFloat64()
+	ret = rd.ExpFloat64()
+	defaultRandPool.Put(rd)
+	return
 }
-func Float32() float32 {
+func Float32() (ret float32) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Float32()
+		ret = globalRng.Rng.Float32()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Float32()
+	ret = rd.Float32()
+	defaultRandPool.Put(rd)
+	return
 }
-func Float64() float64 {
+func Float64() (ret float64) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Float64()
+		ret = globalRng.Rng.Float64()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Float64()
+	ret = rd.Float64()
+	defaultRandPool.Put(rd)
+	return
 }
-func Int() int {
+func Int() (ret int) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Int()
+		ret = globalRng.Rng.Int()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Int()
+	ret = rd.Int()
+	defaultRandPool.Put(rd)
+	return
 }
-func Int31() int32 {
+func Int31() (ret int32) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Int31()
+		ret = globalRng.Rng.Int31()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Int31()
+	ret = rd.Int31()
+	defaultRandPool.Put(rd)
+	return
 }
-func Int31n(n int32) int32 {
+func Int31n(n int32) (ret int32) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Int31n(n)
+		ret = globalRng.Rng.Int31n(n)
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Int31n(n)
+	ret = rd.Int31n(n)
+	defaultRandPool.Put(rd)
+	return
 }
-func Int63() int64 {
+func Int63() (ret int64) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Int63()
+		ret = globalRng.Rng.Int63()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Int63()
+	ret = rd.Int63()
+	defaultRandPool.Put(rd)
+	return
 }
-func Int63n(n int64) int64 {
+func Int63n(n int64) (ret int64) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Int63n(n)
+		ret = globalRng.Rng.Int63n(n)
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Int63n(n)
+	ret = rd.Int63n(n)
+	defaultRandPool.Put(rd)
+	return
 }
-func Intn(n int) int {
+func Intn(n int) (ret int) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Intn(n)
+		ret = globalRng.Rng.Intn(n)
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Intn(n)
+	ret = rd.Intn(n)
+	defaultRandPool.Put(rd)
+	return
 }
-func NormFloat64() float64 {
+func NormFloat64() (ret float64) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.NormFloat64()
+		ret = globalRng.Rng.NormFloat64()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.NormFloat64()
+	ret = rd.NormFloat64()
+	defaultRandPool.Put(rd)
+	return
 }
-func Perm(n int) []int {
+func Perm(n int) (ret []int) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Perm(n)
+		ret = globalRng.Rng.Perm(n)
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Perm(n)
+	ret = rd.Perm(n)
+	defaultRandPool.Put(rd)
+	return
 }
 func Read(p []byte) (n int, err error) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Read(p)
+		n, err = globalRng.Rng.Read(p)
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Read(p)
+	n, err = rd.Read(p)
+	defaultRandPool.Put(rd)
+	return
 }
 func Seed(seed int64) {
 	return
 }
 func Shuffle(n int, swap func(i, j int)) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
 		globalRng.Rng.Shuffle(n, swap)
+		globalRng.Release()
 		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
 	rd.Shuffle(n, swap)
+	defaultRandPool.Put(rd)
 }
-func Uint32() uint32 {
+func Uint32() (ret uint32) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Uint32()
+		ret = globalRng.Rng.Uint32()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Uint32()
+	ret = rd.Uint32()
+	defaultRandPool.Put(rd)
+	return
 }
-func Uint64() uint64 {
+func Uint64() (ret uint64) {
 	if globalRng.Grab() {
-		defer globalRng.Release()
-		return globalRng.Rng.Uint64()
+		globalRng.Rng.Uint64()
+		globalRng.Release()
+		return
 	}
 	rd := defaultRandPool.Get().(*r.Rand)
-	defer defaultRandPool.Put(rd)
-	return rd.Uint64()
+	ret = rd.Uint64()
+	defaultRandPool.Put(rd)
+	return
 }
 
 func Intrange(from, to int, _step ...int) int {
