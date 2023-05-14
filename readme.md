@@ -75,24 +75,24 @@ Do(func (r *rand.Rand) {
 ```
 goos: windows
 goarch: amd64
-pkg: github.com/MeteorsLiu/rand
+pkg: github.com/MeteorsLiu/lockfree-rand
 cpu: Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz
-BenchmarkInt-8                          64142653                18.63 ns/op            0 B/op          0 allocs/op
-BenchmarkGoInt-8                        85382512                16.28 ns/op            0 B/op          0 allocs/op
-BenchmarkReadSmall-8                     1422010               845.7 ns/op             0 B/op          0 allocs/op
-BenchmarkGoReadSmall-8                   1387641               852.5 ns/op             0 B/op          0 allocs/op
-BenchmarkReadMedium-8                      45312             26719 ns/op               0 B/op          0 allocs/op
-BenchmarkGoReadMedium-8                    44556             26519 ns/op               0 B/op          0 allocs/op
-BenchmarkReadLarge-8                       10000            108856 ns/op               0 B/op          0 allocs/op
-BenchmarkGoReadLarge-8                      9871            106127 ns/op               0 B/op          0 allocs/op
-BenchmarkParallel-8                      4756483               247.7 ns/op            16 B/op          1 allocs/op
-BenchmarkGoParallel-8                    4388599               275.8 ns/op            16 B/op          1 allocs/op
-BenchmarkParallelRead-8                  4715338               254.1 ns/op            16 B/op          1 allocs/op
-BenchmarkGoParallelRead-8                2627706               427.8 ns/op            16 B/op          1 allocs/op
-BenchmarkWyhashParallelRead-8            3529256               341.9 ns/op            24 B/op          1 allocs/op
-BenchmarkWyhashPoolParallelRead-8        4086340               291.5 ns/op            48 B/op          1 allocs/op
-BenchmarkGoMultipleDo-8                  1000000              1002 ns/op              19 B/op          1 allocs/op
-BenchmarkMultipleDo-8                    4532272               266.9 ns/op            16 B/op          1 allocs/op
+BenchmarkInt-8                          247086846                4.794 ns/op           0 B/op          0 allocs/op
+BenchmarkGoInt-8                        73754803                16.29 ns/op            0 B/op          0 allocs/op
+BenchmarkReadSmall-8                     1595437               759.7 ns/op             0 B/op          0 allocs/op
+BenchmarkGoReadSmall-8                   1356376               887.3 ns/op             0 B/op          0 allocs/op
+BenchmarkReadMedium-8                      49314             24041 ns/op               0 B/op          0 allocs/op
+BenchmarkGoReadMedium-8                    43911             27435 ns/op               0 B/op          0 allocs/op
+BenchmarkReadLarge-8                       12649             97187 ns/op               0 B/op          0 allocs/op
+BenchmarkGoReadLarge-8                     10000            110534 ns/op               0 B/op          0 allocs/op
+BenchmarkParallel-8                      4934991               253.0 ns/op            16 B/op          1 allocs/op
+BenchmarkGoParallel-8                    4218584               282.6 ns/op            16 B/op          1 allocs/op
+BenchmarkParallelRead-8                  4548276               258.9 ns/op            16 B/op          1 allocs/op
+BenchmarkGoParallelRead-8                2720745               443.8 ns/op            17 B/op          1 allocs/op
+BenchmarkWyhashParallelRead-8            3443152               341.4 ns/op            24 B/op          1 allocs/op
+BenchmarkWyhashPoolParallelRead-8        3987759               300.0 ns/op            48 B/op          1 allocs/op
+BenchmarkGoMultipleDo-8                  1210926               995.7 ns/op            18 B/op          1 allocs/op
+BenchmarkMultipleDo-8                    4430743               276.3 ns/op            16 B/op          1 allocs/op
 ```
 The prefix of BenchmarkGo stands for **math/rand** function, without which, it stands for this repo.
 
