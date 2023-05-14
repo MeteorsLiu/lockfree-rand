@@ -28,6 +28,12 @@ func TestAll(t *testing.T) {
 	t.Log(Int63range(10522, 20453))
 	t.Log(Uniform32(30.5, 55.5))
 	t.Log(Uniform64(30.5, 55.5))
+
+	Do(func(rd *r.Rand) {
+		t.Log(rd.Int())
+		t.Log(rd.Intn(50))
+		t.Log(rd.Uint64())
+	})
 }
 
 func BenchmarkInt(b *testing.B) {
@@ -183,6 +189,42 @@ func BenchmarkWyhashPoolParallelRead(b *testing.B) {
 				}
 			}
 			srng.Read(buf)
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkGoMultipleDo(b *testing.B) {
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			buf := make([]byte, 64)
+			r.Read(buf)
+			_ = r.Int()
+			_ = r.Intn(50)
+			_ = r.Uint64()
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkMultipleDo(b *testing.B) {
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			buf := make([]byte, 64)
+			Do(func(rd *r.Rand) {
+				rd.Read(buf)
+				_ = rd.Int()
+				_ = rd.Intn(50)
+				_ = rd.Uint64()
+			})
 		}()
 	}
 	wg.Wait()

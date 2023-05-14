@@ -231,6 +231,17 @@ func Uint64() (ret uint64) {
 	return
 }
 
+func Do(f func(*r.Rand)) {
+	if globalRng.Grab() {
+		f(globalRng.Rng)
+		globalRng.Release()
+		return
+	}
+	rd := defaultRandPool.Get().(*r.Rand)
+	f(rd)
+	defaultRandPool.Put(rd)
+}
+
 func Intrange(from, to int, _step ...int) int {
 	stp := step(_step...)
 	width := to - from
