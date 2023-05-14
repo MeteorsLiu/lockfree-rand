@@ -61,9 +61,9 @@ That's the Do() do.
 ```
 Do(func (r *rand.Rand) {
     // No more lock here
-    n := rand.Intn(5)
+    n := r.Intn(5)
     for i :=0; i < n; i++ {
-        randseed := rand.Int()
+        randseed := r.Int()
     }
 })
 
