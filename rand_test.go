@@ -34,6 +34,10 @@ func TestAll(t *testing.T) {
 		t.Log(rd.Intn(50))
 		t.Log(rd.Uint64())
 	})
+
+	buf := make([]byte, 64)
+	Read(buf)
+	t.Log(buf)
 }
 
 func BenchmarkInt(b *testing.B) {
