@@ -90,7 +90,7 @@ func Int63n(n int64) int64 {
 	return safeRng.Int63n(n)
 }
 func Intn(n int) int {
-	return safeRng.Int()
+	return safeRng.Intn(n)
 }
 func NormFloat64() float64 {
 	return safeRng.NormFloat64()
