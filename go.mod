@@ -1,4 +1,4 @@
 module github.com/MeteorsLiu/rand
 
-go 1.15
+go 1.18
 
