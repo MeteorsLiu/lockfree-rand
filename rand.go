@@ -112,6 +112,29 @@ func Read(p []byte) (n int, err error) {
 	}
 	return
 }
+
+func ReadN(p []byte, min, max int) (n int) {
+	var pos int8
+	var val uint64
+	width := byte(max - min)
+	minN := byte(min)
+	wsub := width - 1
+	isPowerofTwo := width&wsub == 0
+	for n = 0; n < len(p); n++ {
+		if pos == 0 {
+			val = fastrand64()
+			pos = 7
+		}
+		if isPowerofTwo {
+			p[n] = byte(val)&wsub + minN
+		} else {
+			p[n] = byte(val)%width + minN
+		}
+		val >>= 8
+		pos--
+	}
+	return
+}
 func Seed(seed int64) {
 	return
 }

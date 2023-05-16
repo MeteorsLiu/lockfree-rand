@@ -38,6 +38,30 @@ func TestAll(t *testing.T) {
 	buf := make([]byte, 64)
 	Read(buf)
 	t.Log(buf)
+
+	ReadN(buf, 32, 126)
+	t.Log(buf)
+}
+
+func TestConcurrent(t *testing.T) {
+	var wg sync.WaitGroup
+	wg.Add(5)
+	for i := 0; i < 5; i++ {
+		go func(id int) {
+			defer wg.Done()
+			t.Log(id, Intn(16))
+		}(i)
+	}
+	wg.Wait()
+
+	wg.Add(5)
+	for i := 0; i < 5; i++ {
+		go func(id int) {
+			defer wg.Done()
+			t.Log(id, Int())
+		}(i)
+	}
+	wg.Wait()
 }
 
 func BenchmarkInt(b *testing.B) {
@@ -51,6 +75,38 @@ func BenchmarkGoInt(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_ = r.Int()
+	}
+}
+
+func BenchmarkReadNPowerOfTwo(b *testing.B) {
+	buf := make([]byte, 32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ReadN(buf, 32, 48)
+	}
+}
+
+func BenchmarkRead(b *testing.B) {
+	buf := make([]byte, 32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Read(buf)
+	}
+}
+
+func BenchmarkGoRead(b *testing.B) {
+	buf := make([]byte, 32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		r.Read(buf)
+	}
+}
+
+func BenchmarkReadN(b *testing.B) {
+	buf := make([]byte, 32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ReadN(buf, 32, 126)
 	}
 }
 
@@ -154,6 +210,20 @@ func BenchmarkGoParallelRead(b *testing.B) {
 			defer wg.Done()
 			buf := make([]byte, 64)
 			r.Read(buf)
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkParallelReadN(b *testing.B) {
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			buf := make([]byte, 64)
+			ReadN(buf, 32, 48)
 		}()
 	}
 	wg.Wait()
