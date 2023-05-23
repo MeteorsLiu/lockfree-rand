@@ -16,6 +16,9 @@ const (
 //go:linkname fastrand64 runtime.fastrand64
 func fastrand64() uint64
 
+//go:linkname fastrandn runtime.fastrandn
+func fastrandn(n uint32) uint32
+
 type internalRng struct{}
 
 func (i *internalRng) Int63() int64 {

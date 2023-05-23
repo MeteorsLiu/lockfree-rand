@@ -71,6 +71,34 @@ func BenchmarkInt(b *testing.B) {
 	}
 }
 
+func BenchmarkInt31N(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = Intn(123456)
+	}
+}
+
+func BenchmarkInt63N(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = Intn(1<<31 + 10000)
+	}
+}
+
+func BenchmarkGoInt63N(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = r.Intn(1<<31 + 10000)
+	}
+}
+
+func BenchmarkGoInt31N(b *testing.B) {
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = r.Intn(123456)
+	}
+}
+
 func BenchmarkGoInt(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -107,6 +135,14 @@ func BenchmarkReadN(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		ReadN(buf, 32, 126)
+	}
+}
+
+func BenchmarkReadNU(b *testing.B) {
+	buf := make([]byte, 32)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		ReadNU(buf, 32, 126)
 	}
 }
 
@@ -224,6 +260,20 @@ func BenchmarkParallelReadN(b *testing.B) {
 			defer wg.Done()
 			buf := make([]byte, 64)
 			ReadN(buf, 32, 48)
+		}()
+	}
+	wg.Wait()
+}
+
+func BenchmarkParallelReadNU(b *testing.B) {
+	var wg sync.WaitGroup
+	wg.Add(b.N)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		go func() {
+			defer wg.Done()
+			buf := make([]byte, 64)
+			ReadNU(buf, 32, 48)
 		}()
 	}
 	wg.Wait()

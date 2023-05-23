@@ -81,7 +81,7 @@ func Int31() int32 {
 	return safeRng.Int31()
 }
 func Int31n(n int32) int32 {
-	return safeRng.Int31n(n)
+	return int32(fastrandn(uint32(n)))
 }
 func Int63() int64 {
 	return safeRng.Int63()
@@ -132,6 +132,15 @@ func ReadN(p []byte, min, max int) (n int) {
 		}
 		val >>= 8
 		pos--
+	}
+	return
+}
+
+func ReadNU(p []byte, min, max int) (n int) {
+	width := uint32(max - min)
+	minN := uint32(min)
+	for n = 0; n < len(p); n++ {
+		p[n] = byte(fastrandn(width) + minN)
 	}
 	return
 }
